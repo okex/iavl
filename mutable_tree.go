@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 
 	dbm "github.com/tendermint/tm-db"
 )
@@ -469,7 +470,10 @@ func (tree *MutableTree) SaveVersion() ([]byte, int64, error) {
 			tree.orphans = map[string]int64{}
 			return existingHash, version, nil
 		}
-
+		assignedHeight := viper.GetString("start_height")
+		if assignedHeight != "0" {
+			return newHash, version, nil
+		}
 		return nil, version, fmt.Errorf("version %d was already saved to different hash %X (existing hash %X)", version, newHash, existingHash)
 	}
 
