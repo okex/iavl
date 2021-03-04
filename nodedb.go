@@ -16,6 +16,7 @@ import (
 const (
 	int64Size = 8
 	hashSize  = tmhash.Size
+	genesisHeight = 1
 )
 
 var (
@@ -166,14 +167,21 @@ func (ndb *nodeDB) SaveBranch(node *Node) []byte {
 	node._hash()
 	ndb.SaveNode(node)
 
-	ndb.batch.Write()
-	ndb.batch.Close()
-	ndb.batch = ndb.db.NewBatch()
-
+	//if node.version equal with 1, means that is a genesis block
+	if node.version == genesisHeight{
+		ndb.resetBatch()
+	}
 	node.leftNode = nil
 	node.rightNode = nil
 
 	return node.hash
+}
+
+//resetBatch reset the db batch, keep low memory used
+func (ndb *nodeDB) resetBatch(){
+	ndb.batch.Write()
+	ndb.batch.Close()
+	ndb.batch = ndb.db.NewBatch()
 }
 
 // DeleteVersion deletes a tree version from disk.
