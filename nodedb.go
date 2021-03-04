@@ -166,6 +166,10 @@ func (ndb *nodeDB) SaveBranch(node *Node) []byte {
 	node._hash()
 	ndb.SaveNode(node)
 
+	ndb.batch.Write()
+	ndb.batch.Close()
+	ndb.batch = ndb.db.NewBatch()
+
 	node.leftNode = nil
 	node.rightNode = nil
 
