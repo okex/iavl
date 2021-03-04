@@ -14,9 +14,9 @@ import (
 )
 
 const (
-	int64Size = 8
-	hashSize  = tmhash.Size
-	genesisHeight = 1
+	int64Size      = 8
+	hashSize       = tmhash.Size
+	genesisVersion = 1
 )
 
 var (
@@ -168,7 +168,7 @@ func (ndb *nodeDB) SaveBranch(node *Node) []byte {
 	ndb.SaveNode(node)
 
 	//resetBatch only working on generate a genesis block
-	if node.version == genesisHeight{
+	if node.version == genesisVersion {
 		ndb.resetBatch()
 	}
 	node.leftNode = nil
@@ -179,7 +179,15 @@ func (ndb *nodeDB) SaveBranch(node *Node) []byte {
 
 //resetBatch reset the db batch, keep low memory used
 func (ndb *nodeDB) resetBatch(){
-	ndb.batch.Write()
+	var err error
+	if ndb.opts.Sync {
+		err = ndb.batch.WriteSync()
+	} else {
+		err = ndb.batch.Write()
+	}
+	if err != nil {
+		panic(err)
+	}
 	ndb.batch.Close()
 	ndb.batch = ndb.db.NewBatch()
 }
