@@ -167,7 +167,7 @@ func (ndb *nodeDB) SaveBranch(node *Node) []byte {
 	node._hash()
 	ndb.SaveNode(node)
 
-	//if node.version equal with 1, means that is a genesis block
+	//resetBatch only working on generate a genesis block
 	if node.version == genesisHeight{
 		ndb.resetBatch()
 	}
