@@ -3,6 +3,7 @@ package iavl
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"sort"
 
 	"github.com/pkg/errors"
@@ -535,8 +536,10 @@ func (tree *MutableTree) SetInitialVersion(version uint64) {
 // happen in a single batch with a single commit.
 func (tree *MutableTree) DeleteVersions(versions ...int64) error {
 	debug("DELETING VERSIONS: %v\n", versions)
+	log.Println("[tag] deleted versions", versions)
 
 	for _, version := range versions {
+		log.Println("[tag] version", version)
 		if err := tree.deleteVersion(version); err != nil {
 			return err
 		}
