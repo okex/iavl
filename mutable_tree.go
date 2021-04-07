@@ -536,6 +536,7 @@ func (tree *MutableTree) SetInitialVersion(version uint64) {
 // happen in a single batch with a single commit.
 func (tree *MutableTree) DeleteVersions(versions ...int64) error {
 	debug("DELETING VERSIONS: %v\n", versions)
+	log.Println("[map] tree.versions", tree.versions)
 	log.Println("[tag] deleted versions", versions)
 
 	for _, version := range versions {
