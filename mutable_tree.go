@@ -539,15 +539,20 @@ func (tree *MutableTree) DeleteVersions(versions ...int64) error {
 	log.Println("[tag] tree.versions", tree.versions)
 	log.Println("[tag] deleted versions", versions)
 
-	for _, version := range versions {
+	for i, version := range versions {
 		log.Println("[tag] version", version)
 		if err := tree.deleteVersion(version); err != nil {
 			return err
 		}
 
-		if err := tree.ndb.Commit(); err != nil {
-			return err
+		if i % 10 == 0 {
+			if err := tree.ndb.Commit(); err != nil {
+				return err
+			}
 		}
+	}
+	if err := tree.ndb.Commit(); err != nil {
+		return err
 	}
 
 	for _, version := range versions {
