@@ -540,10 +540,10 @@ func (tree *MutableTree) DeleteVersions(versions ...int64) error {
 		if err := tree.deleteVersion(version); err != nil {
 			return err
 		}
-	}
 
-	if err := tree.ndb.Commit(); err != nil {
-		return err
+		if err := tree.ndb.Commit(); err != nil {
+			return err
+		}
 	}
 
 	for _, version := range versions {
