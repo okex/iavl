@@ -537,6 +537,7 @@ func (tree *MutableTree) SetInitialVersion(version uint64) {
 func (tree *MutableTree) DeleteVersions(versions ...int64) error {
 	debug("DELETING VERSIONS: %v\n", versions)
 	log.Println("[tag] tree.versions", tree.versions)
+	log.Println("[tag] keep versions", versions)
 
 	keepeVersion := versions[0]
 	for version, exist := range tree.versions {
