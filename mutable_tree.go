@@ -536,26 +536,37 @@ func (tree *MutableTree) SetInitialVersion(version uint64) {
 // happen in a single batch with a single commit.
 func (tree *MutableTree) DeleteVersions(versions ...int64) error {
 	debug("DELETING VERSIONS: %v\n", versions)
-	log.Println("[tag] tree.versions", tree.versions)
-	log.Println("[tag] keep versions", versions)
+	log.Println("[tag1] keep versions", versions)
 
 	keepeVersion := versions[len(versions)-1]
+
+	var treeVersions []int64
 	for version, exist := range tree.versions {
-		log.Println("[tag] version", version)
 		if version != keepeVersion && exist {
-			if err := tree.deleteVersion(version); err != nil {
-				return err
-			}
+			treeVersions = append(treeVersions, version)
 		}
 	}
+
+	sort.Slice(treeVersions, func(i, j int) bool {
+		return treeVersions[i] < treeVersions[j]
+
+	})
+
+	log.Println("[tag1] versions to delete", treeVersions)
+
+	for _, version := range treeVersions {
+		log.Println("[tag2] version", version)
+		if err := tree.deleteVersion(version); err != nil {
+			return err
+		}
+	}
+
 	if err := tree.ndb.Commit(); err != nil {
 		return err
 	}
 
-	for version, exist := range tree.versions {
-		if version != keepeVersion && exist {
-			delete(tree.versions, version)
-		}
+	for _, version := range treeVersions {
+		delete(tree.versions, version)
 	}
 
 	return nil
