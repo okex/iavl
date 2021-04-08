@@ -539,7 +539,7 @@ func (tree *MutableTree) DeleteVersions(versions ...int64) error {
 	log.Println("[tag] tree.versions", tree.versions)
 	log.Println("[tag] keep versions", versions)
 
-	keepeVersion := versions[0]
+	keepeVersion := versions[len(versions)-1]
 	for version, exist := range tree.versions {
 		log.Println("[tag] version", version)
 		if version != keepeVersion && exist {
