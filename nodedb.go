@@ -464,11 +464,12 @@ func (ndb *nodeDB) Commit() error {
 	defer ndb.mtx.Unlock()
 
 	var err error
-	if ndb.opts.Sync {
-		err = ndb.batch.WriteSync()
-	} else {
-		err = ndb.batch.Write()
-	}
+	//if ndb.opts.Sync {
+	//	err = ndb.batch.WriteSync()
+	//} else {
+	//	err = ndb.batch.Write()
+	//}
+	err = ndb.batch.WriteSync()
 	if err != nil {
 		return errors.Wrap(err, "failed to write batch")
 	}

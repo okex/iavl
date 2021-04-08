@@ -537,16 +537,12 @@ func (tree *MutableTree) SetInitialVersion(version uint64) {
 func (tree *MutableTree) DeleteVersions(versions ...int64) error {
 	debug("DELETING VERSIONS: %v\n", versions)
 	log.Println("[tag] tree.versions", tree.versions)
-	log.Println("[tag] deleted versions", versions)
 
-	for i, version := range versions {
+	keepeVersion := versions[0]
+	for version, exist := range tree.versions {
 		log.Println("[tag] version", version)
-		if err := tree.deleteVersion(version); err != nil {
-			return err
-		}
-
-		if i % 10 == 0 {
-			if err := tree.ndb.Commit(); err != nil {
+		if version != keepeVersion && exist {
+			if err := tree.deleteVersion(version); err != nil {
 				return err
 			}
 		}
@@ -555,8 +551,10 @@ func (tree *MutableTree) DeleteVersions(versions ...int64) error {
 		return err
 	}
 
-	for _, version := range versions {
-		delete(tree.versions, version)
+	for version, exist := range tree.versions {
+		if version != keepeVersion && exist {
+			delete(tree.versions, version)
+		}
 	}
 
 	return nil
