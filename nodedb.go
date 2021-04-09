@@ -178,7 +178,7 @@ func (ndb *nodeDB) SaveBranch(node *Node) []byte {
 }
 
 //resetBatch reset the db batch, keep low memory used
-func (ndb *nodeDB) resetBatch(){
+func (ndb *nodeDB) resetBatch() {
 	var err error
 	if ndb.opts.Sync {
 		err = ndb.batch.WriteSync()
@@ -464,11 +464,11 @@ func (ndb *nodeDB) Commit() error {
 	defer ndb.mtx.Unlock()
 
 	var err error
-	if ndb.opts.Sync {
-		err = ndb.batch.WriteSync()
-	} else {
-		err = ndb.batch.Write()
-	}
+	//if ndb.opts.Sync {
+	err = ndb.batch.WriteSync()
+	//} else {
+	//	err = ndb.batch.Write()
+	//}
 	if err != nil {
 		return errors.Wrap(err, "failed to write batch")
 	}
