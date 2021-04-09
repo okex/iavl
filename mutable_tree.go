@@ -556,7 +556,7 @@ func (tree *MutableTree) DeleteVersions(versions ...int64) error {
 	for _, version := range versions {
 		delete(tree.versions, version)
 	}
-
+	fmt.Println(tree.versions)
 	return nil
 }
 
