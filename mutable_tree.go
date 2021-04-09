@@ -539,8 +539,10 @@ func (tree *MutableTree) DeleteVersions(versions ...int64) error {
 	for k, version := range versions {
 		if err := tree.deleteVersion(version); err != nil {
 
+		} else {
+			fmt.Println("delete version:", version)
 		}
-		fmt.Println("delete version:", version)
+
 		// avoid batches growing too large by flushing to database regularly
 		if k%10 == 0 && k > 0 {
 			if err := tree.ndb.Commit(); err != nil {
