@@ -513,10 +513,10 @@ func (ndb *nodeDB) saveRoot(hash []byte, version int64) error {
 	defer ndb.mtx.Unlock()
 
 	// We allow the initial version to be arbitrary
-	latest := ndb.getLatestVersion()
-	if latest > 0 && version != latest+1 {
-		return fmt.Errorf("must save consecutive versions; expected %d, got %d", latest+1, version)
-	}
+	//latest := ndb.getLatestVersion()
+	//if latest > 0 && version != latest+1 {
+	//	return fmt.Errorf("must save consecutive versions; expected %d, got %d", latest+1, version)
+	//}
 
 	ndb.batch.Set(ndb.rootKey(version), hash)
 	ndb.updateLatestVersion(version)
