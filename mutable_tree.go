@@ -572,7 +572,7 @@ func (tree *MutableTree) DeleteVersion(version int64) error {
 
 // Rotate right and return the new node and orphan.
 func (tree *MutableTree) rotateRight(node *Node) (*Node, *Node) {
-	version := tree.version + 1
+	version := tree.version
 
 	// TODO: optimize balance & rotate.
 	node = node.clone(version)
@@ -591,7 +591,7 @@ func (tree *MutableTree) rotateRight(node *Node) (*Node, *Node) {
 
 // Rotate left and return the new node and orphan.
 func (tree *MutableTree) rotateLeft(node *Node) (*Node, *Node) {
-	version := tree.version + 1
+	version := tree.version
 
 	// TODO: optimize balance & rotate.
 	node = node.clone(version)
