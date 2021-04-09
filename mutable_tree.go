@@ -447,12 +447,12 @@ func (tree *MutableTree) GetVersioned(key []byte, version int64) (
 // SaveVersion saves a new tree version to disk, based on the current state of
 // the tree. Returns the hash and new version number.
 func (tree *MutableTree) SaveVersion() ([]byte, int64, error) {
-	version := tree.version + 1
+	version := tree.version
 	if version == 1 && tree.ndb.opts.InitialVersion > 0 {
 		version = int64(tree.ndb.opts.InitialVersion) + 1
 	}
 
-	if tree.versions[version] {
+	if false {
 		// If the version already exists, return an error as we're attempting to overwrite.
 		// However, the same hash means idempotent (i.e. no-op).
 		existingHash, err := tree.ndb.getRoot(version)
