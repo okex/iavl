@@ -122,7 +122,7 @@ func (tree *MutableTree) set(key []byte, value []byte) (orphans []*Node, updated
 	}
 
 	if tree.ImmutableTree.root == nil {
-		tree.ImmutableTree.root = NewNode(key, value, tree.version+1)
+		tree.ImmutableTree.root = NewNode(key, value, tree.version)
 		return nil, updated
 	}
 
@@ -134,7 +134,7 @@ func (tree *MutableTree) set(key []byte, value []byte) (orphans []*Node, updated
 func (tree *MutableTree) recursiveSet(node *Node, key []byte, value []byte, orphans *[]*Node) (
 	newSelf *Node, updated bool,
 ) {
-	version := tree.version + 1
+	version := tree.version
 
 	if node.isLeaf() {
 		switch bytes.Compare(key, node.key) {
