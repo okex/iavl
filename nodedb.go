@@ -250,7 +250,56 @@ func (ndb *nodeDB) DeleteVersionsFrom(version int64) error {
 	})
 
 	// Finally, delete the version root entries
-	ndb.traverseRange(rootKeyFormat.Key(version), rootKeyFormat.Key(math.MaxInt64), func(k, v []byte) {
+	ndb.traverseRange(rootKeyFormat.Key(version), rootKeyFormat.Key(int64(math.MaxInt64)), func(k, v []byte) {
+		ndb.batch.Delete(k)
+	})
+
+	return nil
+}
+
+// DeleteVersionsRange deletes versions from an interval (not inclusive).
+func (ndb *nodeDB) DeleteVersionsRange(fromVersion, toVersion int64) error {
+	if fromVersion >= toVersion {
+		return errors.New("toVersion must be greater than fromVersion")
+	}
+	if toVersion == 0 {
+		return errors.New("toVersion must be greater than 0")
+	}
+
+	ndb.mtx.Lock()
+	defer ndb.mtx.Unlock()
+
+	latest := ndb.getLatestVersion()
+	if latest < toVersion {
+		return errors.Errorf("cannot delete latest saved version (%d)", latest)
+	}
+
+	predecessor := ndb.getPreviousVersion(fromVersion)
+
+	for v, r := range ndb.versionReaders {
+		if v < toVersion && v > predecessor && r != 0 {
+			return errors.Errorf("unable to delete version %v with %v active readers", v, r)
+		}
+	}
+
+	// If the predecessor is earlier than the beginning of the lifetime, we can delete the orphan.
+	// Otherwise, we shorten its lifetime, by moving its endpoint to the predecessor version.
+	for version := fromVersion; version < toVersion; version++ {
+		ndb.traverseOrphansVersion(version, func(key, hash []byte) {
+			var from, to int64
+			orphanKeyFormat.Scan(key, &to, &from)
+			ndb.batch.Delete(key)
+			if from > predecessor {
+				ndb.batch.Delete(ndb.nodeKey(hash))
+				ndb.uncacheNode(hash)
+			} else {
+				ndb.saveOrphan(hash, from, predecessor)
+			}
+		})
+	}
+
+	// Delete the version root entries
+	ndb.traverseRange(rootKeyFormat.Key(fromVersion), rootKeyFormat.Key(toVersion), func(k, v []byte) {
 		ndb.batch.Delete(k)
 	})
 
@@ -537,7 +586,7 @@ func (ndb *nodeDB) decrVersionReaders(version int64) {
 	}
 }
 
-////////////////// Utility and test functions /////////////////////////////////
+// Utility and test functions
 
 func (ndb *nodeDB) leafNodes() []*Node {
 	leaves := []*Node{}

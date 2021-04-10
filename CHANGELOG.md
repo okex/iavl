@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.14.3 (November 23, 2020)
+
+Special thanks to external contributors on this release: @klim0v
+
+### Bug Fixes
+
+- [\#324](https://github.com/cosmos/iavl/pull/324) Fix `DeleteVersions` not properly removing
+  orphans, and add `DeleteVersionsRange` to delete a range.
+
+## 0.14.2 (October 12, 2020)
+
+### Bug Fixes
+
+- [\#318](https://github.com/cosmos/iavl/pull/318) Fix constant overflow when compiling for 32bit machines.
+
 ## 0.14.1 (October 9, 2020)
 
 ### Improvements
