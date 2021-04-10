@@ -536,29 +536,50 @@ func (tree *MutableTree) SetInitialVersion(version uint64) {
 func (tree *MutableTree) DeleteVersions(versions ...int64) error {
 	debug("DELETING VERSIONS: %v\n", versions)
 
-	for k, version := range versions {
-		if err := tree.deleteVersion(version); err != nil {
+	if len(versions) == 0 {
+		return nil
+	}
 
-		} else {
-			fmt.Println("delete version:", version)
-		}
+	sort.Slice(versions, func(i, j int) bool {
+		return versions[i] < versions[j]
+	})
 
-		// avoid batches growing too large by flushing to database regularly
-		if k%10 == 0 && k > 0 {
-			if err := tree.ndb.Commit(); err != nil {
-				return err
-			}
+	// Find ordered data and delete by interval
+	intervals := map[int64]int64{}
+	var fromVersion int64
+
+	for _, version := range versions {
+		if version-fromVersion != intervals[fromVersion] {
+			fromVersion = version
 		}
+		intervals[fromVersion]++
+	}
+
+	for fromVersion, sortedBatchSize := range intervals {
+		if err := tree.DeleteVersionsRange(fromVersion, fromVersion+sortedBatchSize); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// DeleteVersionsRange removes versions from an interval from the MutableTree (not inclusive).
+// An error is returned if any single version has active readers.
+// All writes happen in a single batch with a single commit.
+func (tree *MutableTree) DeleteVersionsRange(fromVersion, toVersion int64) error {
+	if err := tree.ndb.DeleteVersionsRange(fromVersion, toVersion); err != nil {
+		return err
 	}
 
 	if err := tree.ndb.Commit(); err != nil {
 		return err
 	}
 
-	for _, version := range versions {
+	for version := fromVersion; version < toVersion; version++ {
 		delete(tree.versions, version)
 	}
-	fmt.Println(tree.versions)
+
 	return nil
 }
 
